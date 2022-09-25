@@ -25,8 +25,6 @@ import java.io.IOException;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private UserDetailsService userDetailsService;
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
@@ -34,29 +32,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated();
         http.
                 formLogin();
+        http
+                .sessionManagement()
+                .sessionFixation().changeSessionId();
 
-        http.logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login")
-                .addLogoutHandler(new LogoutHandler() {
-                    @Override
-                    public void logout(HttpServletRequest request, HttpServletResponse response, Authentication authentication) {
-                        HttpSession session = request.getSession();
-                        session.invalidate();
-                    }
-                })
-                .logoutSuccessHandler(new LogoutSuccessHandler() {
-                    @Override
-                    public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-                        response.sendRedirect("/login");
-                    }
-                })
-                .deleteCookies("remember-me")
-                .and()
-                .rememberMe()
-                .rememberMeParameter("remember")
-                .tokenValiditySeconds(3600)
-                .userDetailsService(userDetailsService)
-                ;
     }
 }
